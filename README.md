@@ -32,6 +32,19 @@ python -m http.server 8137 --directory worldcup
   displays correct local kickoff times anywhere. Instructions for
   iPhone/iPad/Mac are on the tab.
 
+## iPhone install (PWA)
+
+The app is an installable web app. With the site hosted on GitHub Pages
+(HTTPS), open it in Safari on your iPhone → Share → **Add to Home Screen**.
+You get a full-screen app with its own icon, offline caching via the service
+worker, and live ESPN scores. No App Store, no certificates, no expiry.
+
+A GitHub Action ([.github/workflows/update.yml](.github/workflows/update.yml))
+re-fetches the fixture feed every 6 hours, regenerating `fixtures.js` and a
+hosted `world-cup-2026.ics`. Apple Calendar can **subscribe** to that file
+(the Calendar tab shows the `webcal://` link when the site is served over
+HTTPS), so scores and knockout pairings flow into your calendar automatically.
+
 ## Staying up to date
 
 - **Live scores**: the app fetches ESPN's public scoreboard on load, on
