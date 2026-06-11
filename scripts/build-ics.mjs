@@ -63,6 +63,13 @@ for (const f of fixtures.sort((a, b) => a.MatchNumber - b.MatchNumber)) {
   const summary = played
     ? `⚽ ${home} ${f.HomeTeamScore}–${f.AwayTeamScore} ${away} · ${tag}`
     : `⚽ ${home} vs ${away} · ${tag}`;
+  let notes = `FIFA World Cup 2026 · Match ${n} · ${stage.name}\nVenue: ${venue.stadium}, ${venue.city}`;
+  if (played) {
+    let result = `Result: ${home} ${f.HomeTeamScore}–${f.AwayTeamScore} ${away}`;
+    // drawn knockout matches: the feed's Winner field tells us who took the shootout
+    if (n > 72 && f.HomeTeamScore === f.AwayTeamScore && f.Winner) result += `\nWinner: ${f.Winner} (penalties)`;
+    notes = result + '\n\n' + notes;
+  }
   const durMin = n <= 72 ? 120 : 165;
   lines.push(
     'BEGIN:VEVENT',
@@ -73,7 +80,7 @@ for (const f of fixtures.sort((a, b) => a.MatchNumber - b.MatchNumber)) {
     `DTEND:${icsDate(new Date(start.getTime() + durMin * 60e3))}`,
     `SUMMARY:${icsEscape(summary)}`,
     `LOCATION:${icsEscape(venue.stadium + ', ' + venue.city)}`,
-    `DESCRIPTION:${icsEscape(`FIFA World Cup 2026 · Match ${n} · ${stage.name}\nVenue: ${venue.stadium}, ${venue.city}`)}`,
+    `DESCRIPTION:${icsEscape(notes)}`,
   );
   if (!played && start > now) {
     lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsEscape('Kickoff soon: ' + home + ' vs ' + away)}`, 'TRIGGER:-PT30M', 'END:VALARM');

@@ -430,6 +430,21 @@ function icsFold(line) {
 }
 function icsDate(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
 
+// Apple Calendar shows DESCRIPTION as the event's "Notes"
+function buildEventNotes(n, m, hName, aName, stage, now) {
+  let notes = `FIFA World Cup 2026 · Match ${n} · ${stage.name}\nVenue: ${m.venue.stadium}, ${m.venue.city}\nExported ${now.toLocaleString()} — re-import a fresh export to update teams & scores.`;
+  if (finished(m)) {
+    let result = `Result: ${hName} ${m.hs}–${m.as} ${aName}`;
+    if (m.hp != null && m.ap != null) result += ` (${m.hp}–${m.ap} pens)`;
+    if (n > 72 && m.hs === m.as) {
+      const out = matchOutcome(n);
+      if (out && out.winner.name) result += `\nWinner: ${out.winner.name}`;
+    }
+    notes = result + '\n\n' + notes;
+  }
+  return notes;
+}
+
 function buildICS(scopeKey, team, alarm) {
   let nums = ALL_NUMS;
   if (scopeKey === 'group') nums = nums.filter(n => n <= 72);
@@ -464,7 +479,7 @@ function buildICS(scopeKey, team, alarm) {
       `DTEND:${icsDate(end)}`,
       `SUMMARY:${icsEscape(summary)}`,
       `LOCATION:${icsEscape(m.venue.stadium + ', ' + m.venue.city)}`,
-      `DESCRIPTION:${icsEscape(`FIFA World Cup 2026 · Match ${n} · ${stage.name}\nVenue: ${m.venue.stadium}, ${m.venue.city}\nExported ${now.toLocaleString()} — re-import a fresh export to update teams & scores.`)}`,
+      `DESCRIPTION:${icsEscape(buildEventNotes(n, m, hName, aName, stage, now))}`,
     );
     if (alarm && !finished(m)) {
       lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsEscape('Kickoff soon: ' + hName + ' vs ' + aName)}`, 'TRIGGER:-PT30M', 'END:VALARM');
